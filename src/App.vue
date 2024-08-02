@@ -1,26 +1,26 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="app" class="p-4">
+    <Button label="Click Me" class="p-button-rounded p-button-primary" @click="handleClick" />
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import { defineComponent } from 'vue';
+import Button from 'primevue/button';
 
-export default {
+export default defineComponent({
   name: 'App',
   components: {
-    HelloWorld
+    Button
+  },
+  methods: {
+    handleClick() {
+      alert('Button clicked!');
+    }
   }
-}
+});
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+/* Add any custom styles here */
 </style>
