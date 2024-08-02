@@ -69,7 +69,7 @@
             </div>
             <div class="upgrade-message">
               The readability, font choice, and consistency of text elements to ensure effective
-              communication..
+              communication.
             </div>
             <ProgressBar value="75" class="custom-progress-bar"></ProgressBar>
             <div class="vendor-count">75/100</div>
