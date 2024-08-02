@@ -36,25 +36,17 @@
 
         <div v-if="uploadedImages.length > 0" class="uploaded-designs">
           <h3>Uploaded Designs ({{ uploadedImages.length }})</h3>
-          <Carousel
-            :value="uploadedImages"
-            :numVisible="3"
-            :numScroll="1"
-            class="custom-carousel"
-            :responsiveOptions="carouselResponsiveOptions"
-          >
-            <template #item="slotProps">
-              <div class="carousel-item-wrapper">
-                <div
-                  class="carousel-item"
-                  :class="{ selected: slotProps.data === selectedImage }"
-                  @click="selectImage(slotProps.data)"
-                >
-                  <img :src="slotProps.data" :alt="'Uploaded Design ' + (slotProps.index + 1)" />
-                </div>
-              </div>
-            </template>
-          </Carousel>
+          <div class="image-grid">
+            <div
+              v-for="(image, index) in uploadedImages"
+              :key="index"
+              class="grid-item"
+              :class="{ selected: image === selectedImage }"
+              @click="selectImage(image)"
+            >
+              <img :src="image" :alt="'Uploaded Design ' + (index + 1)" />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -121,7 +113,6 @@ import InputText from 'primevue/inputtext'
 import FileUpload from 'primevue/fileupload'
 import Card from 'primevue/card'
 import ProgressBar from 'primevue/progressbar'
-import Carousel from 'primevue/carousel'
 
 // Navbar items
 const items = ref([
@@ -160,24 +151,6 @@ const onSelect = (event) => {
 const selectImage = (image) => {
   selectedImage.value = image
 }
-
-const carouselResponsiveOptions = ref([
-  {
-    breakpoint: '1024px',
-    numVisible: 3,
-    numScroll: 1
-  },
-  {
-    breakpoint: '768px',
-    numVisible: 2,
-    numScroll: 1
-  },
-  {
-    breakpoint: '560px',
-    numVisible: 1,
-    numScroll: 1
-  }
-])
 </script>
 
 <style scoped>
@@ -244,33 +217,30 @@ const carouselResponsiveOptions = ref([
   margin-top: 1rem;
 }
 
-.custom-carousel :deep(.p-carousel-container) {
-  padding: 0 40px;
+.image-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 40px;
+  padding: 20px 0;
 }
 
-.custom-carousel :deep(.p-carousel-items-container) {
-  margin: 0 -20px;
-}
-
-.carousel-item-wrapper {
-  padding: 0 20px;
-}
-
-.carousel-item {
-  height: 100px;
+.grid-item {
+  flex: 0 0 auto;
   width: 100px;
+  height: 100px;
   border: 1px solid #ced4da;
   border-radius: 10px;
   overflow: hidden;
   cursor: pointer;
 }
 
-.carousel-item.selected {
+.grid-item.selected {
   border-color: #4caf50;
-  border-width: 2px;
+  border-width: 3px;
 }
 
-.carousel-item img {
+.grid-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
