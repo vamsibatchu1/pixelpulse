@@ -1,9 +1,12 @@
-import { createApp } from 'vue';
-import App from './App.vue';
-import PrimeVue from 'primevue/config';
-import 'primeicons/primeicons.css';
-import './assets/tailwind.css';
+import { createApp } from 'vue'
+import App from './App.vue'
+import PrimeVue from 'primevue/config'
 
-const app = createApp(App);
-app.use(PrimeVue);
-app.mount('#app');
+// PrimeVue styles
+import 'primevue/resources/themes/saga-blue/theme.css' //theme
+import 'primevue/resources/primevue.min.css' //core css
+import 'primeicons/primeicons.css' //icons
+
+const app = createApp(App)
+app.use(PrimeVue)
+app.mount('#app')
