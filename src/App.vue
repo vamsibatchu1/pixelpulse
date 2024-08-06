@@ -62,73 +62,31 @@
           <span>Overall</span>
           <span class="score">3.6</span>
         </div>
-        <Card class="usage-card" id="typography">
+        <Card v-for="(card, index) in cards" :key="index" class="usage-card" :id="card.id">
           <template #content>
-            <div class="usage-info">
+            <div class="usage-info" @click="toggleCard(index)">
               <div class="category">
-                <img :src="typography" alt="Typography" class="category-icon" />
-                Typography
+                <img :src="card.icon" :alt="card.title" class="category-icon" />
+                {{ card.title }}
               </div>
-              <span class="score decrease">4.3</span>
+              <div class="score-and-toggle">
+                <span :class="['score', card.score >= 5 ? 'increase' : 'decrease']">{{
+                  card.score
+                }}</span>
+                <i :class="['pi', card.expanded ? 'pi-chevron-up' : 'pi-chevron-down']"></i>
+              </div>
+            </div>
+            <div v-if="card.expanded" class="card-details">
+              <div v-for="(issue, issueIndex) in card.issues" :key="issueIndex" class="issue">
+                <div class="issue-dot" :class="issue.severity"></div>
+                <div>
+                  <h4>{{ issue.title }}</h4>
+                  <p>{{ issue.description }}</p>
+                </div>
+              </div>
             </div>
           </template>
         </Card>
-        <Card class="usage-card" id="colorusage">
-          <template #content>
-            <div class="usage-info">
-              <div class="category">
-                <img :src="color" alt="Color Usage" class="category-icon" />
-                Color Usage
-              </div>
-              <span class="score increase">8.0</span>
-            </div>
-          </template>
-        </Card>
-        <Card class="usage-card" id="layout">
-          <template #content>
-            <div class="usage-info">
-              <div class="category">
-                <img :src="layout" alt="Color Usage" class="category-icon" />
-                Layout & Composition
-              </div>
-              <span class="score decrease">3.6</span>
-            </div>
-          </template>
-        </Card>
-        <Card class="usage-card" id="ia">
-          <template #content>
-            <div class="usage-info">
-              <div class="category">
-                <img :src="ia" alt="Color Usage" class="category-icon" />
-                Information Architecture
-              </div>
-              <span class="score decrease">3.6</span>
-            </div>
-          </template>
-        </Card>
-        <Card class="usage-card" id="spacing">
-          <template #content>
-            <div class="usage-info">
-              <div class="category">
-                <img :src="spacing" alt="Color Usage" class="category-icon" />
-                Spacing & Padding
-              </div>
-              <span class="score decrease">3.6</span>
-            </div>
-          </template>
-        </Card>
-        <Card class="usage-card" id="navigation">
-          <template #content>
-            <div class="usage-info">
-              <div class="category">
-                <img :src="navigation" alt="Color Usage" class="category-icon" />
-                Navigation
-              </div>
-              <span class="score decrease">3.6</span>
-            </div>
-          </template>
-        </Card>
-        <!-- Additional cards can be added here -->
       </div>
     </div>
   </div>
@@ -138,10 +96,8 @@
 // The script section remains unchanged
 import { ref } from 'vue'
 import Menubar from 'primevue/menubar'
-//import InputText from 'primevue/inputtext'
 import FileUpload from 'primevue/fileupload'
 import Card from 'primevue/card'
-//import ProgressBar from 'primevue/progressbar'
 import pplogo from '@/assets/pplogo.svg'
 import typography from '@/assets/typography.svg'
 import color from '@/assets/color.svg'
@@ -184,9 +140,85 @@ const onSelect = (event) => {
 const selectImage = (image) => {
   selectedImage.value = image
 }
+
+// Cards data
+const cards = ref([
+  {
+    id: 'typography',
+    title: 'Typography',
+    icon: typography,
+    score: 4.3,
+    expanded: false,
+    issues: [
+      {
+        severity: 'high',
+        title: 'Inconsistent button text styles',
+        description:
+          'The "Play" and "Replay" buttons use different text styles (weight and possibly size). Standardize button text for visual consistency.'
+      },
+      {
+        severity: 'high',
+        title: 'Column header legibility issues',
+        description:
+          'The light gray used for column headers (e.g., "Relevance", "Frustration") has low contrast. Increase contrast for better readability.'
+      },
+      {
+        severity: 'medium',
+        title: 'Overcrowded navigation sidebar',
+        description:
+          'The sidebar icons are densely packed with small text labels. Increase spacing and font size to improve navigation usability.'
+      }
+    ]
+  },
+  {
+    id: 'colorusage',
+    title: 'Color Usage',
+    icon: color,
+    score: 8.0,
+    expanded: false,
+    issues: []
+  },
+  {
+    id: 'layout',
+    title: 'Layout & Composition',
+    icon: layout,
+    score: 3.6,
+    expanded: false,
+    issues: []
+  },
+  {
+    id: 'ia',
+    title: 'Information Architecture',
+    icon: ia,
+    score: 3.6,
+    expanded: false,
+    issues: []
+  },
+  {
+    id: 'spacing',
+    title: 'Spacing & Padding',
+    icon: spacing,
+    score: 3.6,
+    expanded: false,
+    issues: []
+  },
+  {
+    id: 'navigation',
+    title: 'Navigation',
+    icon: navigation,
+    score: 3.6,
+    expanded: false,
+    issues: []
+  }
+])
+
+const toggleCard = (index) => {
+  cards.value[index].expanded = !cards.value[index].expanded
+}
 </script>
 
 <style scoped>
+/* All previous styles remain unchanged */
 .layout-wrapper {
   display: flex;
   flex-direction: column;
@@ -338,32 +370,44 @@ h2 {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  padding: 0px;
   margin-bottom: 16px;
   width: 100%;
-  height: 105px;
   background: #ffffff;
   border: 1px solid #eaecf0;
   box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.05);
   border-radius: 12px;
+  transition: all 0.3s ease;
 }
 
 .usage-info {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  width: 100%;
+  cursor: pointer;
 }
 
 .category {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 16px;
+  flex: 1; /* This will make the category take up all available space */
+}
+
+.category-icon {
+  width: 44px;
+  height: 44px;
+}
+
+.score-and-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap; /* Prevent wrapping of score and chevron */
 }
 
 .score {
   font-weight: bold;
+  font-size: 1.2rem;
 }
 
 .increase {
@@ -374,8 +418,45 @@ h2 {
   color: #ff4d4f;
 }
 
-.custom-progress-bar {
-  height: 0.5rem;
+.card-details {
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.issue {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.issue-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-top: 4px;
+}
+
+.issue-dot.high {
+  background-color: #ff4d4f;
+}
+
+.issue-dot.medium {
+  background-color: #faad14;
+}
+
+.issue-dot.low {
+  background-color: #52c41a;
+}
+
+.issue h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 14px;
+}
+
+.issue p {
+  margin: 0;
+  color: #666;
+  font-size: 12px;
 }
 
 body {
