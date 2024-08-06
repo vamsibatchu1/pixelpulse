@@ -138,10 +138,10 @@
 // The script section remains unchanged
 import { ref } from 'vue'
 import Menubar from 'primevue/menubar'
-import InputText from 'primevue/inputtext'
+//import InputText from 'primevue/inputtext'
 import FileUpload from 'primevue/fileupload'
 import Card from 'primevue/card'
-import ProgressBar from 'primevue/progressbar'
+//import ProgressBar from 'primevue/progressbar'
 import pplogo from '@/assets/pplogo.svg'
 import typography from '@/assets/typography.svg'
 import color from '@/assets/color.svg'
@@ -216,7 +216,7 @@ const selectImage = (image) => {
 .content-wrapper {
   display: flex;
   flex: 1;
-  padding: 2rem;
+  padding: 0rem;
   gap: 2rem;
 }
 
@@ -224,6 +224,8 @@ const selectImage = (image) => {
   flex: 7;
   display: flex;
   flex-direction: column;
+  padding-top: 32px;
+  padding-left: 32px;
 }
 
 .right-section {
@@ -232,11 +234,17 @@ const selectImage = (image) => {
   border-radius: 8px;
   padding: 1.5rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  font-family: 'Recoleta', sans-serif;
+}
+
+body {
+  margin: 0px !important;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
+  font-family: 'Recoleta', sans-serif;
   align-items: center;
   margin-bottom: 1rem;
 }
@@ -366,10 +374,11 @@ h2 {
   color: #ff4d4f;
 }
 
-.uploadbutton {
-}
-
 .custom-progress-bar {
   height: 0.5rem;
+}
+
+body {
+  font-family: 'Recoleta', sans-serif !important;
 }
 </style>
