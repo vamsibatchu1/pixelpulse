@@ -17,15 +17,31 @@
         <div class="header">
           <h1>Pixel Pulse</h1>
           <FileUpload
-            class="uploadbutton"
+            class="custom-upload-button"
             mode="basic"
             :multiple="true"
             accept="image/*"
             :maxFileSize="1000000"
             @select="onSelect"
             :auto="true"
-            chooseLabel="Upload Your Design"
-          />
+          >
+            <template #chooseButton="{ className, chooseButtonLabel }">
+              <span
+                :class="className"
+                style="
+                  background-color: #000000;
+                  border: none;
+                  color: white;
+                  padding: 10px 20px;
+                  font-size: 16px;
+                  border-radius: 8px;
+                  cursor: pointer;
+                "
+              >
+                + Upload Your Design
+              </span>
+            </template>
+          </FileUpload>
         </div>
 
         <div class="selected-image-container">
@@ -78,11 +94,11 @@
             </div>
             <div v-if="card.expanded" class="card-details">
               <div v-for="(issue, issueIndex) in card.issues" :key="issueIndex" class="issue">
-                <div class="issue-dot" :class="issue.severity"></div>
-                <div>
+                <div class="issue-header">
+                  <div class="issue-dot" :class="issue.severity"></div>
                   <h4>{{ issue.title }}</h4>
-                  <p>{{ issue.description }}</p>
                 </div>
+                <p>{{ issue.description }}</p>
               </div>
             </div>
           </template>
@@ -296,6 +312,8 @@ h1 {
 .selected-image-container {
   background-color: #ffffff;
   border-radius: 8px;
+  border-color: #666;
+  border-width: 1px solid #666;
   overflow: hidden;
   margin-bottom: 1rem;
   height: 400px;
@@ -421,19 +439,27 @@ h2 {
 .card-details {
   margin-top: 1rem;
   width: 100%;
+  padding-left: 8px;
 }
 
 .issue {
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
   margin-bottom: 1rem;
+}
+
+.issue-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .issue-dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  margin-top: 4px;
+  flex-shrink: 0;
 }
 
 .issue-dot.high {
@@ -449,7 +475,7 @@ h2 {
 }
 
 .issue h4 {
-  margin: 0 0 0.5rem 0;
+  margin: 0;
   font-size: 14px;
 }
 
@@ -457,9 +483,18 @@ h2 {
   margin: 0;
   color: #666;
   font-size: 12px;
+  padding-left: calc(12px + 0.5rem); /* Align with the header text */
 }
 
 body {
   font-family: 'Recoleta', sans-serif !important;
+}
+
+.custom-upload-button {
+  display: inline-block;
+}
+
+.custom-upload-button :deep(.p-button-icon) {
+  display: none !important;
 }
 </style>
