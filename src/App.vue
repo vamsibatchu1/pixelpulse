@@ -278,7 +278,7 @@ const toggleCard = (index) => {
 
 .right-section {
   flex: 3;
-  background-color: #ffffff;
+  background-color: #f6fafd;
   border-radius: 8px;
   padding: 1.5rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -395,6 +395,7 @@ h2 {
   box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.05);
   border-radius: 12px;
   transition: all 0.3s ease;
+  overflow: hidden; /* Add this to ensure border-radius is applied to child elements */
 }
 
 .usage-info {
@@ -496,5 +497,9 @@ body {
 
 .custom-upload-button :deep(.p-button-icon) {
   display: none !important;
+}
+
+:deep(.p-card-content) {
+  padding: 0rem !important;
 }
 </style>
