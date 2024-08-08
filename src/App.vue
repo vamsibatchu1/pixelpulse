@@ -59,43 +59,50 @@
       </div>
 
       <!-- Right Section (30%) -->
-      <div class="right-section">
+      <div v-if="hasAnalyzedImage || analysisLoading" class="right-section">
         <h2>Design Diagnostics</h2>
         <div v-if="analysisLoading" class="analysis-loading">
           <img :src="loading" style="width: 30px" />
           <p style="margin-top: -3px">Analyzing image...</p>
         </div>
-        <div v-if="analysis" class="overall-score">
-          <span>Overall</span>
-          <span class="score" :class="getScoreClass(analysis.overallScore)">{{
-            analysis.overallScore.toFixed(1)
-          }}</span>
-        </div>
-        <Card v-for="(card, index) in analysisCards" :key="index" class="usage-card" :id="card.id">
-          <template #content>
-            <div class="usage-info" @click="toggleCard(index)">
-              <div class="category">
-                <img :src="card.icon" :alt="card.title" class="category-icon" />
-                {{ card.title }}
-              </div>
-              <div class="score-and-toggle">
-                <span :class="['score', getScoreClass(card.score)]">
-                  {{ card.score.toFixed(1) }}
-                </span>
-                <i :class="['pi', card.expanded ? 'pi-chevron-up' : 'pi-chevron-down']"></i>
-              </div>
-            </div>
-            <div v-if="card.expanded" class="card-details">
-              <div v-for="(issue, issueIndex) in card.issues" :key="issueIndex" class="issue">
-                <div class="issue-header">
-                  <div class="issue-dot" :class="issue.severity"></div>
-                  <h4>{{ issue.title }}</h4>
+        <div v-else-if="analysis" class="analysis-content">
+          <div class="overall-score">
+            <span>Overall</span>
+            <span class="score" :class="getScoreClass(analysis.overallScore)">
+              {{ analysis.overallScore.toFixed(1) }}
+            </span>
+          </div>
+          <Card
+            v-for="(card, index) in analysisCards"
+            :key="index"
+            class="usage-card"
+            :id="card.id"
+          >
+            <template #content>
+              <div class="usage-info" @click="toggleCard(index)">
+                <div class="category">
+                  <img :src="card.icon" :alt="card.title" class="category-icon" />
+                  {{ card.title }}
                 </div>
-                <p>{{ issue.description }}</p>
+                <div class="score-and-toggle">
+                  <span :class="['score', getScoreClass(card.score)]">
+                    {{ card.score.toFixed(1) }}
+                  </span>
+                  <i :class="['pi', card.expanded ? 'pi-chevron-up' : 'pi-chevron-down']"></i>
+                </div>
               </div>
-            </div>
-          </template>
-        </Card>
+              <div v-if="card.expanded" class="card-details">
+                <div v-for="(issue, issueIndex) in card.issues" :key="issueIndex" class="issue">
+                  <div class="issue-header">
+                    <div class="issue-dot" :class="issue.severity"></div>
+                    <h4>{{ issue.title }}</h4>
+                  </div>
+                  <p>{{ issue.description }}</p>
+                </div>
+              </div>
+            </template>
+          </Card>
+        </div>
       </div>
     </div>
   </div>
@@ -116,10 +123,13 @@ import spacing from '@/assets/spacing.svg'
 import placeholderImage from '@/assets/thumbnail.svg'
 import loading from '@/assets/loading.gif'
 import axios from 'axios'
-import { useAnalysis } from './composables/useAnalysis' // Assume we have this composable
+import { useAnalysis } from './composables/useAnalysis'
 import { SpeedInsights } from '@vercel/speed-insights/vue'
 
 const { analysis, analysisCards, toggleCard } = useAnalysis()
+
+const hasAnalyzedImage = ref(false)
+const analysisLoading = ref(false)
 
 const getScoreClass = (score) => {
   if (score >= 8) return 'score-high'
@@ -133,7 +143,6 @@ const items = ref([])
 // Image uploader and display logic
 const uploadedImages = ref([])
 const selectedImage = ref(null)
-const analysisLoading = ref(false)
 
 //Parsing the Analysis
 const parseAnalysisResult = (content) => {
@@ -174,6 +183,7 @@ const parseAnalysisResult = (content) => {
 //Code for Analyzing Image
 const analyzeImage = async (imageData) => {
   analysisLoading.value = true
+  hasAnalyzedImage.value = true
   try {
     const response = await axios.post(
       'https://api.openai.com/v1/chat/completions',
@@ -185,12 +195,12 @@ const analyzeImage = async (imageData) => {
             content: [
               {
                 type: 'text',
-                text: `Analyze this image for its design quality from a UX and product design perspective. 
-                Provide an overall score out of 10, and detailed sub-scores for the following categories: typography, 
-                color usage, layout and composition, information architecture, spacing and padding, and navigation. 
-                Every category should have multiple specific issues generated for sure. For each category, identify 
-                and describe multiple specific issues, referencing particular elements in the image and offering clear 
-                and actionable insights for improvement. Be explicit about which parts of the image the feedback refers to. 
+                text: `Analyze this image for its design quality from a UX and product design perspective.
+                Provide an overall score out of 10, and detailed sub-scores for the following categories: typography,
+                color usage, layout and composition, information architecture, spacing and padding, and navigation.
+                Every category should have multiple specific issues generated for sure. For each category, identify
+                and describe multiple specific issues, referencing particular elements in the image and offering clear
+                and actionable insights for improvement. Be explicit about which parts of the image the feedback refers to.
                 Return the result as a JSON object with the following structure:
                 {
                   "overallScore": 8.0,
@@ -269,8 +279,7 @@ const analyzeImage = async (imageData) => {
     }
   } catch (error) {
     console.error('Error analyzing image:', error.response ? error.response.data : error.message)
-    analysisResult.value = 'Error occurred during analysis.'
-    showAnalysisModal.value = true
+    // Handle error state here
   } finally {
     analysisLoading.value = false
   }
@@ -340,6 +349,25 @@ const selectImage = (image) => {
   padding: 1.5rem;
   box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
   font-family: 'Recoleta', sans-serif;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 1;
+}
+
+.analysis-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+}
+
+.analysis-content {
+  opacity: 100;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.analysis-content.visible {
+  opacity: 100;
 }
 
 .header {
