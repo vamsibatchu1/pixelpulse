@@ -187,7 +187,13 @@ const analyzeImage = async (imageData) => {
             content: [
               {
                 type: 'text',
-                text: `Analyze this image for its design quality from a UX and product design perspective. Provide an overall score out of 10, and detailed sub-scores for the following categories: typography, color usage, layout and composition, information architecture, spacing and padding, and navigation. Every category such have issues generated for sure. For each category, identify and describe multiple specific issues, offering clear and actionable insights for improvement. Return the result as a JSON object with the following structure:
+                text: `Analyze this image for its design quality from a UX and product design perspective. 
+                Provide an overall score out of 10, and detailed sub-scores for the following categories: typography, 
+                color usage, layout and composition, information architecture, spacing and padding, and navigation. 
+                Every category should have multiple specific issues generated for sure. For each category, identify 
+                and describe multiple specific issues, referencing particular elements in the image and offering clear 
+                and actionable insights for improvement. Be explicit about which parts of the image the feedback refers to. 
+                Return the result as a JSON object with the following structure:
                 {
                   "overallScore": 8.0,
                   "categories": [
@@ -356,7 +362,7 @@ h1 {
   border-radius: 8px;
   border: 1px solid #e0e0e0;
   margin: 32px;
-  margin-top: 24px;
+  margin-top: 8px;
   margin-left: 32px;
   margin-right: 32px;
   height: 400px;
