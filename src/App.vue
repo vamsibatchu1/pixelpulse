@@ -42,9 +42,6 @@
             </div>
           </template>
         </div>
-
-        <div v-if="analysisLoading" class="analysis-loading">Analyzing image...</div>
-
         <div v-if="uploadedImages.length > 0" class="uploaded-designs">
           <h3>Uploaded Designs ({{ uploadedImages.length }})</h3>
           <div class="image-grid">
@@ -65,6 +62,10 @@
       <!-- Right Section (30%) -->
       <div class="right-section">
         <h2>Design Diagnostics</h2>
+        <div v-if="analysisLoading" class="analysis-loading">
+          <img :src="loading" style="width: 30px" />
+          Analyzing image...
+        </div>
         <div v-if="analysis" class="overall-score">
           <span>Overall</span>
           <span class="score" :class="getScoreClass(analysis.overallScore)">{{
@@ -119,6 +120,7 @@ import ia from '@/assets/ia.svg'
 import navigation from '@/assets/navigation.svg'
 import spacing from '@/assets/spacing.svg'
 import placeholderImage from '@/assets/thumbnail.svg'
+import loading from '@/assets/loading.gif'
 import axios from 'axios'
 import Dialog from 'primevue/dialog'
 import { useAnalysis } from './composables/useAnalysis' // Assume we have this composable
