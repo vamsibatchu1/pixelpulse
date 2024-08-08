@@ -52,6 +52,7 @@
             class="selected-image"
           />
           <div v-else class="placeholder">Selected Image</div>
+          <img :src="thumbnail" alt="Thumbnail" class="thumbnail" />
         </div>
 
         <div v-if="uploadedImages.length > 0" class="uploaded-designs">
@@ -121,6 +122,7 @@ import layout from '@/assets/layout.svg'
 import ia from '@/assets/ia.svg'
 import navigation from '@/assets/navigation.svg'
 import spacing from '@/assets/spacing.svg'
+import thumbnail from '@/assets/thumbnail.svg'
 
 // Navbar items
 const items = ref([
@@ -241,6 +243,8 @@ const toggleCard = (index) => {
   height: 100vh;
   background-color: #f5f5f5;
   font-family: Arial, sans-serif;
+  margin: 0; /* Remove any default margin */
+  padding: 0; /* Remove any default padding */
 }
 
 .p-menubar {
@@ -264,25 +268,26 @@ const toggleCard = (index) => {
 .content-wrapper {
   display: flex;
   flex: 1;
-  padding: 0rem;
-  gap: 2rem;
+  padding: 0; /* Remove the padding */
+  gap: 0; /* Remove the gap between left and right sections */
 }
 
 .left-section {
   flex: 7;
   display: flex;
   flex-direction: column;
-  padding-top: 32px;
-  padding-left: 32px;
+  padding: 0; /* Remove the padding */
 }
 
 .right-section {
   flex: 3;
   background-color: #f6fafd;
-  border-radius: 8px;
   padding: 1.5rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  font-family: 'Recoleta', sans-serif;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1); /* Add left shadow for separation */
+}
+
+.header {
+  padding: 1rem 2rem; /* Add some padding to the header */
 }
 
 body {
@@ -294,7 +299,6 @@ body {
   justify-content: space-between;
   font-family: 'Recoleta', sans-serif;
   align-items: center;
-  margin-bottom: 1rem;
 }
 
 h1 {
@@ -311,12 +315,20 @@ h1 {
 
 .selected-image-container {
   background-color: #ffffff;
-  border-radius: 8px;
-  border-color: #666;
-  border-width: 1px solid #666;
-  overflow: hidden;
-  margin-bottom: 1rem;
+  border-radius: 5px; /* Remove border radius */
+  border: none; /* Remove border */
+  margin: 32px;
+  margin-top: 0px;
+  margin-left: auto;
+  margin-right: auto;
+  align-items: center;
+  align-content: center;
   height: 400px;
+  padding: 1rem 2rem; /* Add padding to match the header */
+}
+
+.uploaded-designs {
+  padding: 0 2rem; /* Add horizontal padding */
 }
 
 .selected-image {
@@ -497,6 +509,12 @@ body {
 
 .custom-upload-button :deep(.p-button-icon) {
   display: none !important;
+}
+
+.thumbnail {
+  width: 450px;
+  height: auto;
+  object-fit: cover;
 }
 
 :deep(.p-card-content) {
