@@ -11,6 +11,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@vercel/speed-insights": "^1.0.12",
     "axios": "^1.7.3",
     "chart.js": "^4.4.3",
     "pinia": "^2.1.7",

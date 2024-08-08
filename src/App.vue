@@ -117,6 +117,7 @@ import placeholderImage from '@/assets/thumbnail.svg'
 import loading from '@/assets/loading.gif'
 import axios from 'axios'
 import { useAnalysis } from './composables/useAnalysis' // Assume we have this composable
+import { SpeedInsights } from '@vercel/speed-insights/vue'
 
 const { analysis, analysisCards, toggleCard } = useAnalysis()
 
