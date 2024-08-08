@@ -591,6 +591,7 @@ h2 {
 
 body {
   font-family: 'Recoleta', sans-serif !important;
+  margin: 0px !important;
 }
 
 .custom-upload-button {
