@@ -21,9 +21,10 @@
             :maxFileSize="1000000"
             @select="onSelect"
             :auto="true"
+            chooseLabel="Upload your designs"
           >
-            <template #chooseButton="{ className, chooseButtonLabel }">
-              <span :class="className"> + Upload Your Design </span>
+            <template #chooseButton="{ className }">
+              <span :class="className">+ Upload your designs</span>
             </template>
           </FileUpload>
         </div>
@@ -62,7 +63,7 @@
         <h2>Design Diagnostics</h2>
         <div v-if="analysisLoading" class="analysis-loading">
           <img :src="loading" style="width: 30px" />
-          Analyzing image...
+          <p style="margin-top: -3px">Analyzing image...</p>
         </div>
         <div v-if="analysis" class="overall-score">
           <span>Overall</span>
@@ -408,6 +409,9 @@ h1 {
 }
 
 .analysis-loading {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
   text-align: center;
   padding: 20px;
   font-size: 18px;
