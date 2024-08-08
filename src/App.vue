@@ -141,6 +141,43 @@ const analysisLoading = ref(false)
 const showAnalysisModal = ref(false)
 const analysisResult = ref('')
 
+//Parsing the Analysis
+const parseAnalysisResult = (content) => {
+  const lines = content.split('\n')
+  const overallScore = parseFloat(lines[2].split(':')[1].trim())
+  const categories = [
+    'Typography',
+    'Color Usage',
+    'Layout and Composition',
+    'Information Architecture',
+    'Spacing and Padding',
+    'Navigation'
+  ]
+  const parsedAnalysis = {
+    overallScore,
+    categories: {}
+  }
+
+  let currentCategory = ''
+  for (const line of lines) {
+    const categoryMatch = categories.find((cat) => line.includes(cat + ':'))
+    if (categoryMatch) {
+      currentCategory = categoryMatch.toLowerCase().replace(/ /g, '')
+      const score = parseFloat(line.split(':')[1].trim())
+      parsedAnalysis.categories[currentCategory] = { score, issues: [] }
+    } else if (line.trim().startsWith('-') && currentCategory) {
+      parsedAnalysis.categories[currentCategory].issues.push({
+        title: line.trim().substring(2),
+        description: '',
+        severity: 'medium' // You might want to implement logic to determine severity
+      })
+    }
+  }
+
+  return parsedAnalysis
+}
+
+//Code for Analyzing Image
 const analyzeImage = async (imageData) => {
   analysisLoading.value = true
   try {
@@ -154,12 +191,15 @@ const analyzeImage = async (imageData) => {
             content: [
               {
                 type: 'text',
-                text: 'Analyze this image for its design quality. Provide an overall score out of 10, and sub-scores for typography, color usage, layout and composition, information architecture, spacing and padding, and navigation. Also provide specific issues and insights for each category.'
+                text: 'Analyze this image for its design quality. Provide an overall score out of 10, and sub-scores for typography, color usage, layout and composition, information architecture, spacing and padding, and navigation. Also provide specific issues and insights for each category. Return the result as a JSON object with the following structure: { overallScore: number, categories: { typography: { score: number, issues: [{ title: string, description: string, severity: string }] }, colorUsage: { ... }, layoutAndComposition: { ... }, informationArchitecture: { ... }, spacingAndPadding: { ... }, navigation: { ... } } }'
               },
               { type: 'image_url', image_url: { url: imageData } }
             ]
           }
-        ]
+        ],
+        max_tokens: 800,
+        temperature: 0.5,
+        response_format: { type: 'json_object' }
       },
       {
         headers: {
@@ -177,11 +217,14 @@ const analyzeImage = async (imageData) => {
       response.data.choices[0] &&
       response.data.choices[0].message
     ) {
-      const content = response.data.choices[0].message.content
+      const content = JSON.parse(response.data.choices[0].message.content)
       console.log('OpenAI content:', content)
 
+      // Set the analysis directly from the JSON response
+      analysis.value = content
+
       // Set the analysis result and show the modal
-      analysisResult.value = content
+      analysisResult.value = JSON.stringify(content, null, 2)
       showAnalysisModal.value = true
     } else {
       throw new Error('Unexpected response format from OpenAI')
@@ -195,6 +238,7 @@ const analyzeImage = async (imageData) => {
   }
 }
 
+//Code for On Select
 const onSelect = (event) => {
   const files = event.files
   for (let file of files) {
@@ -215,6 +259,7 @@ const selectImage = (image) => {
   selectedImage.value = image
 }
 
+//Code for Card Analysis
 const analysisCards = computed(() => {
   if (!analysis.value) return []
   return [
@@ -222,49 +267,49 @@ const analysisCards = computed(() => {
       id: 'typography',
       title: 'Typography',
       icon: typography,
-      score: analysis.value.typography.score,
+      score: analysis.value.categories.typography?.score || 0,
       expanded: false,
-      issues: analysis.value.typography.issues
+      issues: analysis.value.categories.typography?.issues || []
     },
     {
       id: 'colorusage',
       title: 'Color Usage',
       icon: color,
-      score: analysis.value.colorUsage.score,
+      score: analysis.value.categories.colorUsage?.score || 0,
       expanded: false,
-      issues: analysis.value.colorUsage.issues
+      issues: analysis.value.categories.colorUsage?.issues || []
     },
     {
       id: 'layout',
       title: 'Layout & Composition',
       icon: layout,
-      score: analysis.value.layoutAndComposition.score,
+      score: analysis.value.categories.layoutAndComposition?.score || 0,
       expanded: false,
-      issues: analysis.value.layoutAndComposition.issues
+      issues: analysis.value.categories.layoutAndComposition?.issues || []
     },
     {
       id: 'ia',
       title: 'Information Architecture',
       icon: ia,
-      score: analysis.value.informationArchitecture.score,
+      score: analysis.value.categories.informationArchitecture?.score || 0,
       expanded: false,
-      issues: analysis.value.informationArchitecture.issues
+      issues: analysis.value.categories.informationArchitecture?.issues || []
     },
     {
       id: 'spacing',
       title: 'Spacing & Padding',
       icon: spacing,
-      score: analysis.value.spacingAndPadding.score,
+      score: analysis.value.categories.spacingAndPadding?.score || 0,
       expanded: false,
-      issues: analysis.value.spacingAndPadding.issues
+      issues: analysis.value.categories.spacingAndPadding?.issues || []
     },
     {
       id: 'navigation',
       title: 'Navigation',
       icon: navigation,
-      score: analysis.value.navigation.score,
+      score: analysis.value.categories.navigation?.score || 0,
       expanded: false,
-      issues: analysis.value.navigation.issues
+      issues: analysis.value.categories.navigation?.issues || []
     }
   ]
 })
@@ -343,8 +388,8 @@ h1 {
   border: 1px solid #e0e0e0;
   margin: 32px;
   margin-top: 24px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-left: 32px;
+  margin-right: 32px;
   height: 400px;
   display: flex;
   justify-content: center;
@@ -476,8 +521,6 @@ h2 {
   align-items: center;
   width: 100%;
   cursor: pointer;
-  padding: 1rem;
-  background-color: #f0f7ff;
 }
 
 .category {
