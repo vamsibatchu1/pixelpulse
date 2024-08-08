@@ -36,8 +36,8 @@
           <template v-else>
             <div class="placeholder">
               <img :src="placeholderImage" alt="Upload placeholder" class="placeholder-image" />
-              <p class="upload-text">Upload SVG, PNG, JPG or GIF</p>
-              <p class="upload-size">(max. 800x400px)</p>
+              <p class="upload-text">Upload a PNG or JPG file</p>
+              <p class="upload-size">Maximum File Size: 1 MB</p>
             </div>
           </template>
         </div>
@@ -128,11 +128,7 @@ const getScoreClass = (score) => {
 }
 
 // Navbar items
-const items = ref([
-  {
-    label: 'About Pixel Pulse'
-  }
-])
+const items = ref([])
 
 // Image uploader and display logic
 const uploadedImages = ref([])
