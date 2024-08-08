@@ -5,9 +5,7 @@
       <template #start>
         <img :src="pplogo" alt="Typography" class="category-icon" />
       </template>
-      <template #end>
-        <div class="user-avatar"></div>
-      </template>
+      <template #end> </template>
     </Menubar>
 
     <div class="content-wrapper">
@@ -136,13 +134,7 @@ const getScoreClass = (score) => {
 // Navbar items
 const items = ref([
   {
-    label: 'Evaluate Designs'
-  },
-  {
-    label: 'History'
-  },
-  {
-    label: 'Settings'
+    label: 'About Pixel Pulse'
   }
 ])
 
@@ -334,13 +326,6 @@ const selectImage = (image) => {
 .brand {
   font-size: 1.2rem;
   font-weight: bold;
-}
-
-.user-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: #cccccc;
 }
 
 .content-wrapper {
