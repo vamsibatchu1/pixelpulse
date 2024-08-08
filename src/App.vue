@@ -362,6 +362,7 @@ const selectImage = (image) => {
   background-color: #f6fafd;
   padding: 1.5rem;
   box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+  font-family: 'Recoleta', sans-serif;
 }
 
 .header {
