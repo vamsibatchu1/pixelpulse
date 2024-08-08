@@ -36,12 +36,14 @@
           </template>
           <template v-else>
             <div class="placeholder">
-              <img :src="thumbnail" alt="Upload placeholder" class="placeholder-image" />
-              <p class="upload-text">Upload your designs (SVG, PNG, JPG or GIF)</p>
+              <img :src="placeholderImage" alt="Upload placeholder" class="placeholder-image" />
+              <p class="upload-text">Upload SVG, PNG, JPG or GIF</p>
               <p class="upload-size">(max. 800x400px)</p>
             </div>
           </template>
         </div>
+
+        <div v-if="analysisLoading" class="analysis-loading">Analyzing image...</div>
 
         <div v-if="uploadedImages.length > 0" class="uploaded-designs">
           <h3>Uploaded Designs ({{ uploadedImages.length }})</h3>
@@ -63,11 +65,11 @@
       <!-- Right Section (30%) -->
       <div class="right-section">
         <h2>Design Diagnostics</h2>
-        <div class="overall-score">
+        <div v-if="analysis" class="overall-score">
           <span>Overall</span>
-          <span class="score">3.6</span>
+          <span class="score">{{ analysis.overallScore.toFixed(1) }}</span>
         </div>
-        <Card v-for="(card, index) in cards" :key="index" class="usage-card" :id="card.id">
+        <Card v-for="(card, index) in analysisCards" :key="index" class="usage-card" :id="card.id">
           <template #content>
             <div class="usage-info" @click="toggleCard(index)">
               <div class="category">
@@ -75,9 +77,9 @@
                 {{ card.title }}
               </div>
               <div class="score-and-toggle">
-                <span :class="['score', card.score >= 5 ? 'increase' : 'decrease']">{{
-                  card.score
-                }}</span>
+                <span :class="['score', card.score >= 5 ? 'increase' : 'decrease']">
+                  {{ card.score.toFixed(1) }}
+                </span>
                 <i :class="['pi', card.expanded ? 'pi-chevron-up' : 'pi-chevron-down']"></i>
               </div>
             </div>
@@ -94,11 +96,16 @@
         </Card>
       </div>
     </div>
+
+    <!-- New Dialog component for displaying the analysis -->
+    <Dialog v-model:visible="showAnalysisModal" header="Image Analysis" :style="{ width: '50vw' }">
+      <p style="white-space: pre-wrap">{{ analysisResult }}</p>
+    </Dialog>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import Menubar from 'primevue/menubar'
 import FileUpload from 'primevue/fileupload'
 import Card from 'primevue/card'
@@ -109,7 +116,9 @@ import layout from '@/assets/layout.svg'
 import ia from '@/assets/ia.svg'
 import navigation from '@/assets/navigation.svg'
 import spacing from '@/assets/spacing.svg'
-import thumbnail from '@/assets/thumbnail.svg'
+import placeholderImage from '@/assets/thumbnail.svg'
+import axios from 'axios'
+import Dialog from 'primevue/dialog'
 
 // Navbar items
 const items = ref([
@@ -127,16 +136,76 @@ const items = ref([
 // Image uploader and display logic
 const uploadedImages = ref([])
 const selectedImage = ref(null)
+const analysis = ref(null)
+const analysisLoading = ref(false)
+const showAnalysisModal = ref(false)
+const analysisResult = ref('')
+
+const analyzeImage = async (imageData) => {
+  analysisLoading.value = true
+  try {
+    const response = await axios.post(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: 'Analyze this image for its design quality. Provide an overall score out of 10, and sub-scores for typography, color usage, layout and composition, information architecture, spacing and padding, and navigation. Also provide specific issues and insights for each category.'
+              },
+              { type: 'image_url', image_url: { url: imageData } }
+            ]
+          }
+        ]
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+
+    console.log('Raw OpenAI response:', response.data)
+
+    if (
+      response.data &&
+      response.data.choices &&
+      response.data.choices[0] &&
+      response.data.choices[0].message
+    ) {
+      const content = response.data.choices[0].message.content
+      console.log('OpenAI content:', content)
+
+      // Set the analysis result and show the modal
+      analysisResult.value = content
+      showAnalysisModal.value = true
+    } else {
+      throw new Error('Unexpected response format from OpenAI')
+    }
+  } catch (error) {
+    console.error('Error analyzing image:', error.response ? error.response.data : error.message)
+    analysisResult.value = 'Error occurred during analysis.'
+    showAnalysisModal.value = true
+  } finally {
+    analysisLoading.value = false
+  }
+}
 
 const onSelect = (event) => {
   const files = event.files
   for (let file of files) {
     const reader = new FileReader()
-    reader.onload = (e) => {
-      uploadedImages.value.push(e.target.result)
+    reader.onload = async (e) => {
+      const imageData = e.target.result
+      uploadedImages.value.push(imageData)
       if (!selectedImage.value) {
-        selectedImage.value = e.target.result
+        selectedImage.value = imageData
       }
+      await analyzeImage(imageData)
     }
     reader.readAsDataURL(file)
   }
@@ -146,79 +215,62 @@ const selectImage = (image) => {
   selectedImage.value = image
 }
 
-// Cards data
-const cards = ref([
-  {
-    id: 'typography',
-    title: 'Typography',
-    icon: typography,
-    score: 4.3,
-    expanded: false,
-    issues: [
-      {
-        severity: 'high',
-        title: 'Inconsistent button text styles',
-        description:
-          'The "Play" and "Replay" buttons use different text styles (weight and possibly size). Standardize button text for visual consistency.'
-      },
-      {
-        severity: 'high',
-        title: 'Column header legibility issues',
-        description:
-          'The light gray used for column headers (e.g., "Relevance", "Frustration") has low contrast. Increase contrast for better readability.'
-      },
-      {
-        severity: 'medium',
-        title: 'Overcrowded navigation sidebar',
-        description:
-          'The sidebar icons are densely packed with small text labels. Increase spacing and font size to improve navigation usability.'
-      }
-    ]
-  },
-  {
-    id: 'colorusage',
-    title: 'Color Usage',
-    icon: color,
-    score: 8.0,
-    expanded: false,
-    issues: []
-  },
-  {
-    id: 'layout',
-    title: 'Layout & Composition',
-    icon: layout,
-    score: 3.6,
-    expanded: false,
-    issues: []
-  },
-  {
-    id: 'ia',
-    title: 'Information Architecture',
-    icon: ia,
-    score: 3.6,
-    expanded: false,
-    issues: []
-  },
-  {
-    id: 'spacing',
-    title: 'Spacing & Padding',
-    icon: spacing,
-    score: 3.6,
-    expanded: false,
-    issues: []
-  },
-  {
-    id: 'navigation',
-    title: 'Navigation',
-    icon: navigation,
-    score: 3.6,
-    expanded: false,
-    issues: []
-  }
-])
+const analysisCards = computed(() => {
+  if (!analysis.value) return []
+  return [
+    {
+      id: 'typography',
+      title: 'Typography',
+      icon: typography,
+      score: analysis.value.typography.score,
+      expanded: false,
+      issues: analysis.value.typography.issues
+    },
+    {
+      id: 'colorusage',
+      title: 'Color Usage',
+      icon: color,
+      score: analysis.value.colorUsage.score,
+      expanded: false,
+      issues: analysis.value.colorUsage.issues
+    },
+    {
+      id: 'layout',
+      title: 'Layout & Composition',
+      icon: layout,
+      score: analysis.value.layoutAndComposition.score,
+      expanded: false,
+      issues: analysis.value.layoutAndComposition.issues
+    },
+    {
+      id: 'ia',
+      title: 'Information Architecture',
+      icon: ia,
+      score: analysis.value.informationArchitecture.score,
+      expanded: false,
+      issues: analysis.value.informationArchitecture.issues
+    },
+    {
+      id: 'spacing',
+      title: 'Spacing & Padding',
+      icon: spacing,
+      score: analysis.value.spacingAndPadding.score,
+      expanded: false,
+      issues: analysis.value.spacingAndPadding.issues
+    },
+    {
+      id: 'navigation',
+      title: 'Navigation',
+      icon: navigation,
+      score: analysis.value.navigation.score,
+      expanded: false,
+      issues: analysis.value.navigation.issues
+    }
+  ]
+})
 
 const toggleCard = (index) => {
-  cards.value[index].expanded = !cards.value[index].expanded
+  analysisCards.value[index].expanded = !analysisCards.value[index].expanded
 }
 </script>
 
@@ -290,9 +342,9 @@ h1 {
   border-radius: 8px;
   border: 1px solid #e0e0e0;
   margin: 32px;
-  margin-top: 8px;
-  margin-left: 32px;
-  margin-right: 32px;
+  margin-top: 24px;
+  margin-left: auto;
+  margin-right: auto;
   height: 400px;
   display: flex;
   justify-content: center;
@@ -333,6 +385,13 @@ h1 {
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+.analysis-loading {
+  text-align: center;
+  padding: 20px;
+  font-size: 18px;
+  color: #666;
 }
 
 .uploaded-designs {
@@ -417,6 +476,8 @@ h2 {
   align-items: center;
   width: 100%;
   cursor: pointer;
+  padding: 1rem;
+  background-color: #f0f7ff;
 }
 
 .category {
