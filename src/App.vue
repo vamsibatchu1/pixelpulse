@@ -67,7 +67,9 @@
         <h2>Design Diagnostics</h2>
         <div v-if="analysis" class="overall-score">
           <span>Overall</span>
-          <span class="score">{{ analysis.overallScore.toFixed(1) }}</span>
+          <span class="score" :class="getScoreClass(analysis.overallScore)">{{
+            analysis.overallScore.toFixed(1)
+          }}</span>
         </div>
         <Card v-for="(card, index) in analysisCards" :key="index" class="usage-card" :id="card.id">
           <template #content>
@@ -77,7 +79,7 @@
                 {{ card.title }}
               </div>
               <div class="score-and-toggle">
-                <span :class="['score', card.score >= 5 ? 'increase' : 'decrease']">
+                <span :class="['score', getScoreClass(card.score)]">
                   {{ card.score.toFixed(1) }}
                 </span>
                 <i :class="['pi', card.expanded ? 'pi-chevron-up' : 'pi-chevron-down']"></i>
@@ -119,6 +121,15 @@ import spacing from '@/assets/spacing.svg'
 import placeholderImage from '@/assets/thumbnail.svg'
 import axios from 'axios'
 import Dialog from 'primevue/dialog'
+import { useAnalysis } from './composables/useAnalysis' // Assume we have this composable
+
+const { analysis, analysisCards, toggleCard } = useAnalysis()
+
+const getScoreClass = (score) => {
+  if (score >= 8) return 'score-high'
+  if (score >= 6) return 'score-medium'
+  return 'score-low'
+}
 
 // Navbar items
 const items = ref([
@@ -136,7 +147,6 @@ const items = ref([
 // Image uploader and display logic
 const uploadedImages = ref([])
 const selectedImage = ref(null)
-const analysis = ref(null)
 const analysisLoading = ref(false)
 const showAnalysisModal = ref(false)
 const analysisResult = ref('')
@@ -191,13 +201,55 @@ const analyzeImage = async (imageData) => {
             content: [
               {
                 type: 'text',
-                text: 'Analyze this image for its design quality. Provide an overall score out of 10, and sub-scores for typography, color usage, layout and composition, information architecture, spacing and padding, and navigation. Also provide specific issues and insights for each category. Return the result as a JSON object with the following structure: { overallScore: number, categories: { typography: { score: number, issues: [{ title: string, description: string, severity: string }] }, colorUsage: { ... }, layoutAndComposition: { ... }, informationArchitecture: { ... }, spacingAndPadding: { ... }, navigation: { ... } } }'
+                text: `Analyze this image for its design quality. Provide an overall score out of 10, and sub-scores for typography, color usage, layout and composition, information architecture, spacing and padding, and navigation. Also provide specific issues and insights for each category. Return the result as a JSON object with the following structure:
+                {
+                  "overallScore": 8.0,
+                  "categories": [
+                    {
+                      "name": "Typography",
+                      "score": 8.0,
+                      "issues": [
+                        {
+                          "title": "Issue Title",
+                          "description": "Issue Description",
+                          "severity": "low" | "medium" | "high"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Color Usage",
+                      "score": 9.0,
+                      "issues": []
+                    },
+                    {
+                      "name": "Layout & Composition",
+                      "score": 7.0,
+                      "issues": []
+                    },
+                    {
+                      "name": "Information Architecture",
+                      "score": 8.0,
+                      "issues": []
+                    },
+                    {
+                      "name": "Spacing & Padding",
+                      "score": 8.0,
+                      "issues": []
+                    },
+                    {
+                      "name": "Navigation",
+                      "score": 8.0,
+                      "issues": []
+                    }
+                  ]
+                }
+                Ensure all scores are to one decimal place, and that the category names match exactly as shown.`
               },
               { type: 'image_url', image_url: { url: imageData } }
             ]
           }
         ],
-        max_tokens: 800,
+        max_tokens: 1000,
         temperature: 0.5,
         response_format: { type: 'json_object' }
       },
@@ -257,65 +309,6 @@ const onSelect = (event) => {
 
 const selectImage = (image) => {
   selectedImage.value = image
-}
-
-//Code for Card Analysis
-const analysisCards = computed(() => {
-  if (!analysis.value) return []
-  return [
-    {
-      id: 'typography',
-      title: 'Typography',
-      icon: typography,
-      score: analysis.value.categories.typography?.score || 0,
-      expanded: false,
-      issues: analysis.value.categories.typography?.issues || []
-    },
-    {
-      id: 'colorusage',
-      title: 'Color Usage',
-      icon: color,
-      score: analysis.value.categories.colorUsage?.score || 0,
-      expanded: false,
-      issues: analysis.value.categories.colorUsage?.issues || []
-    },
-    {
-      id: 'layout',
-      title: 'Layout & Composition',
-      icon: layout,
-      score: analysis.value.categories.layoutAndComposition?.score || 0,
-      expanded: false,
-      issues: analysis.value.categories.layoutAndComposition?.issues || []
-    },
-    {
-      id: 'ia',
-      title: 'Information Architecture',
-      icon: ia,
-      score: analysis.value.categories.informationArchitecture?.score || 0,
-      expanded: false,
-      issues: analysis.value.categories.informationArchitecture?.issues || []
-    },
-    {
-      id: 'spacing',
-      title: 'Spacing & Padding',
-      icon: spacing,
-      score: analysis.value.categories.spacingAndPadding?.score || 0,
-      expanded: false,
-      issues: analysis.value.categories.spacingAndPadding?.issues || []
-    },
-    {
-      id: 'navigation',
-      title: 'Navigation',
-      icon: navigation,
-      score: analysis.value.categories.navigation?.score || 0,
-      expanded: false,
-      issues: analysis.value.categories.navigation?.issues || []
-    }
-  ]
-})
-
-const toggleCard = (index) => {
-  analysisCards.value[index].expanded = !analysisCards.value[index].expanded
 }
 </script>
 
@@ -557,20 +550,16 @@ h2 {
 
 .card-details {
   margin-top: 1rem;
-  width: 100%;
-  padding-left: 8px;
+  padding: 0 1rem;
 }
 
 .issue {
-  display: flex;
-  flex-direction: column;
   margin-bottom: 1rem;
 }
 
 .issue-header {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
@@ -578,17 +567,15 @@ h2 {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  flex-shrink: 0;
+  margin-right: 0.5rem;
 }
 
 .issue-dot.high {
   background-color: #ff4d4f;
 }
-
 .issue-dot.medium {
   background-color: #faad14;
 }
-
 .issue-dot.low {
   background-color: #52c41a;
 }
@@ -596,13 +583,23 @@ h2 {
 .issue h4 {
   margin: 0;
   font-size: 14px;
+  font-weight: bold;
 }
 
 .issue p {
   margin: 0;
-  color: #666;
   font-size: 12px;
-  padding-left: calc(12px + 0.5rem);
+  color: #666;
+}
+
+.score-high {
+  color: #52c41a;
+}
+.score-medium {
+  color: #faad14;
+}
+.score-low {
+  color: #ff4d4f;
 }
 
 body {
