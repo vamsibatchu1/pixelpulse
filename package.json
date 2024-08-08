@@ -11,9 +11,11 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.16.0",
     "@vercel/speed-insights": "^1.0.12",
     "axios": "^1.7.3",
     "chart.js": "^4.4.3",
+    "dotenv": "^16.4.5",
     "pinia": "^2.1.7",
     "primeicons": "^5.0.0",
     "primevue": "^3.12.1",
