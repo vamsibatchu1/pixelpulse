@@ -623,6 +623,10 @@ body {
   border-radius: 8px;
 }
 
+#app {
+  margin: 0px !important;
+}
+
 .custom-upload-button :deep(.p-button:hover) {
   background-color: #f5f5f5 !important;
 }
