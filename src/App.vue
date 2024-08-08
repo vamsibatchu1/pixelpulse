@@ -97,11 +97,6 @@
         </Card>
       </div>
     </div>
-
-    <!-- New Dialog component for displaying the analysis -->
-    <Dialog v-model:visible="showAnalysisModal" header="Image Analysis" :style="{ width: '50vw' }">
-      <p style="white-space: pre-wrap">{{ analysisResult }}</p>
-    </Dialog>
   </div>
 </template>
 
@@ -120,7 +115,6 @@ import spacing from '@/assets/spacing.svg'
 import placeholderImage from '@/assets/thumbnail.svg'
 import loading from '@/assets/loading.gif'
 import axios from 'axios'
-import Dialog from 'primevue/dialog'
 import { useAnalysis } from './composables/useAnalysis' // Assume we have this composable
 
 const { analysis, analysisCards, toggleCard } = useAnalysis()
@@ -142,8 +136,6 @@ const items = ref([
 const uploadedImages = ref([])
 const selectedImage = ref(null)
 const analysisLoading = ref(false)
-const showAnalysisModal = ref(false)
-const analysisResult = ref('')
 
 //Parsing the Analysis
 const parseAnalysisResult = (content) => {
@@ -268,10 +260,6 @@ const analyzeImage = async (imageData) => {
 
       // Set the analysis directly from the JSON response
       analysis.value = content
-
-      // Set the analysis result and show the modal
-      analysisResult.value = JSON.stringify(content, null, 2)
-      showAnalysisModal.value = true
     } else {
       throw new Error('Unexpected response format from OpenAI')
     }
