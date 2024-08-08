@@ -1,5 +1,4 @@
 <template>
-  <!-- The template remains unchanged -->
   <div class="layout-wrapper">
     <!-- Navbar -->
     <Menubar :model="items">
@@ -26,33 +25,22 @@
             :auto="true"
           >
             <template #chooseButton="{ className, chooseButtonLabel }">
-              <span
-                :class="className"
-                style="
-                  background-color: #000000;
-                  border: none;
-                  color: white;
-                  padding: 10px 20px;
-                  font-size: 16px;
-                  border-radius: 8px;
-                  cursor: pointer;
-                "
-              >
-                + Upload Your Design
-              </span>
+              <span :class="className"> + Upload Your Design </span>
             </template>
           </FileUpload>
         </div>
 
         <div class="selected-image-container">
-          <img
-            v-if="selectedImage"
-            :src="selectedImage"
-            alt="Selected Design"
-            class="selected-image"
-          />
-          <div v-else class="placeholder">Selected Image</div>
-          <img :src="thumbnail" alt="Thumbnail" class="thumbnail" />
+          <template v-if="selectedImage">
+            <img :src="selectedImage" alt="Selected Design" class="selected-image" />
+          </template>
+          <template v-else>
+            <div class="placeholder">
+              <img :src="thumbnail" alt="Upload placeholder" class="placeholder-image" />
+              <p class="upload-text">Upload your designs (SVG, PNG, JPG or GIF)</p>
+              <p class="upload-size">(max. 800x400px)</p>
+            </div>
+          </template>
         </div>
 
         <div v-if="uploadedImages.length > 0" class="uploaded-designs">
@@ -110,7 +98,6 @@
 </template>
 
 <script setup>
-// The script section remains unchanged
 import { ref } from 'vue'
 import Menubar from 'primevue/menubar'
 import FileUpload from 'primevue/fileupload'
@@ -236,15 +223,14 @@ const toggleCard = (index) => {
 </script>
 
 <style scoped>
-/* All previous styles remain unchanged */
 .layout-wrapper {
   display: flex;
   flex-direction: column;
   height: 100vh;
   background-color: #f5f5f5;
   font-family: Arial, sans-serif;
-  margin: 0; /* Remove any default margin */
-  padding: 0; /* Remove any default padding */
+  margin: 0;
+  padding: 0;
 }
 
 .p-menubar {
@@ -268,30 +254,22 @@ const toggleCard = (index) => {
 .content-wrapper {
   display: flex;
   flex: 1;
-  padding: 0; /* Remove the padding */
-  gap: 0; /* Remove the gap between left and right sections */
+  padding: 0;
+  gap: 0;
 }
 
 .left-section {
   flex: 7;
   display: flex;
   flex-direction: column;
-  padding: 0; /* Remove the padding */
+  padding: 0;
 }
 
 .right-section {
   flex: 3;
   background-color: #f6fafd;
   padding: 1.5rem;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1); /* Add left shadow for separation */
-}
-
-.header {
-  padding: 1rem 2rem; /* Add some padding to the header */
-}
-
-body {
-  margin: 0px !important;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .header {
@@ -299,6 +277,7 @@ body {
   justify-content: space-between;
   font-family: 'Recoleta', sans-serif;
   align-items: center;
+  padding: 1rem 2rem;
 }
 
 h1 {
@@ -306,35 +285,58 @@ h1 {
   margin: 0;
 }
 
-.p-fileupload-choose {
-  background-color: #ffffff !important;
-  color: #000000 !important;
-  border: none !important;
-  font-weight: bold !important;
-}
-
 .selected-image-container {
   background-color: #ffffff;
-  border-radius: 5px; /* Remove border radius */
-  border: none; /* Remove border */
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
   margin: 32px;
-  margin-top: 0px;
-  margin-left: auto;
-  margin-right: auto;
-  align-items: center;
-  align-content: center;
+  margin-top: 8px;
+  margin-left: 32px;
+  margin-right: 32px;
   height: 400px;
-  padding: 1rem 2rem; /* Add padding to match the header */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
 
-.uploaded-designs {
-  padding: 0 2rem; /* Add horizontal padding */
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+}
+
+.placeholder-image {
+  width: 200px;
+  height: auto;
+  margin-bottom: 16px;
+}
+
+.upload-text {
+  font-size: 16px;
+  color: #333;
+  margin: 0;
+  margin-bottom: 8px;
+}
+
+.upload-size {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
 }
 
 .selected-image {
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+.uploaded-designs {
+  padding: 0 2rem;
 }
 
 .image-grid {
@@ -407,7 +409,7 @@ h2 {
   box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.05);
   border-radius: 12px;
   transition: all 0.3s ease;
-  overflow: hidden; /* Add this to ensure border-radius is applied to child elements */
+  overflow: hidden;
 }
 
 .usage-info {
@@ -421,7 +423,7 @@ h2 {
   display: flex;
   align-items: center;
   gap: 16px;
-  flex: 1; /* This will make the category take up all available space */
+  flex: 1;
 }
 
 .category-icon {
@@ -433,7 +435,7 @@ h2 {
   display: flex;
   align-items: center;
   gap: 8px;
-  white-space: nowrap; /* Prevent wrapping of score and chevron */
+  white-space: nowrap;
 }
 
 .score {
@@ -496,7 +498,7 @@ h2 {
   margin: 0;
   color: #666;
   font-size: 12px;
-  padding-left: calc(12px + 0.5rem); /* Align with the header text */
+  padding-left: calc(12px + 0.5rem);
 }
 
 body {
@@ -507,14 +509,22 @@ body {
   display: inline-block;
 }
 
-.custom-upload-button :deep(.p-button-icon) {
-  display: none !important;
+.custom-upload-button :deep(.p-button) {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #e0e0e0 !important;
+  font-weight: normal !important;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 8px;
 }
 
-.thumbnail {
-  width: 450px;
-  height: auto;
-  object-fit: cover;
+.custom-upload-button :deep(.p-button:hover) {
+  background-color: #f5f5f5 !important;
+}
+
+.custom-upload-button :deep(.p-button-icon) {
+  display: none !important;
 }
 
 :deep(.p-card-content) {
