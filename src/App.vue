@@ -5,6 +5,14 @@
       <div class="flex justify-between items-center">
         <img :src="pplogo" alt="Logo" class="h-8" />
         <div></div>
+        <div class="flex items-center space-x-4">
+          <button
+            @click="showAbout = true"
+            class="hover:text-gray-300 transition-colors duration-200"
+          >
+            About Pixel Pulse
+          </button>
+        </div>
       </div>
     </nav>
 
@@ -143,6 +151,26 @@
       </div>
     </div>
   </div>
+
+  <!-- About Modal -->
+  <div
+    v-if="showAbout"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  >
+    <div class="bg-white p-6 rounded-lg max-w-md">
+      <h2 class="text-2xl font-bold mb-4">About Pixel Pulse</h2>
+      <p class="mb-4">
+        Pixel Pulse is an AI-powered design analysis tool that helps designers and developers
+        improve their UI/UX by providing detailed feedback on various aspects of their designs.
+      </p>
+      <button
+        @click="showAbout = false"
+        class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors duration-200"
+      >
+        Close
+      </button>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -164,6 +192,7 @@ const analysisLoading = ref(false)
 const uploadedImages = ref([])
 const selectedImage = ref(null)
 const showRightSection = ref(false)
+const showAbout = ref(false)
 
 const getScoreClass = (score) => {
   if (score >= 8) return 'text-green-500'
