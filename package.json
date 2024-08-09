@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.16.0",
+    "@heroicons/vue": "^2.1.5",
     "@vercel/speed-insights": "^1.0.12",
     "axios": "^1.7.3",
     "chart.js": "^4.4.3",

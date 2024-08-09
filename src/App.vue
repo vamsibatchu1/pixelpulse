@@ -2,7 +2,7 @@
   <div class="flex flex-col h-screen bg-neutral-100 font-sans">
     <!-- Navbar -->
     <nav class="bg-black shadow">
-      <div class="mx-auto max-w-7xl px-2 sm:px-4 lg:px-8">
+      <div class="mx-auto max-w-9xl px-2 sm:px-4 lg:px-8">
         <div class="flex h-16 justify-between">
           <div class="flex px-2 lg:px-0">
             <div class="flex flex-shrink-0 items-center">
