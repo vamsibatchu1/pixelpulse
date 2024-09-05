@@ -6,9 +6,9 @@
           <strong class="font-semibold">Pixel Pulse</strong
           ><svg viewBox="0 0 2 2" class="mx-2 inline h-0.5 w-0.5 fill-current" aria-hidden="true">
             <circle cx="1" cy="1" r="1" /></svg
-          >This is currently available in a BETA mode. Launch coming soon.<span aria-hidden="true"
-          </span
-          >
+          >This is currently available in a BETA mode. Launch coming soon.<span
+            aria-hidden="true"
+          ></span>
         </a>
       </p>
       <div class="flex flex-1 justify-end">
@@ -19,8 +19,9 @@
       </div>
     </div>
   </div>
+
   <div class="flex flex-1 overflow-hidden">
-    <!-- Left Section (dynamically adjusted width) -->
+    <!-- Left Section (dynamically adjusted width and height) -->
     <div
       :class="['p-8 overflow-y-auto relative', showRightSection ? 'w-full lg:w-8/12' : 'w-full']"
     >
@@ -29,13 +30,16 @@
         <label
           class="cursor-pointer bg-white text-black border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-100"
         >
-          + Upload your designs
-          <input type="file" class="hidden" @change="onSelect" multiple accept="image/*" />
+          + Upload your design
+          <input type="file" class="hidden" @change="onSelect" accept="image/*" />
         </label>
       </div>
 
       <div
-        class="bg-white border border-gray-300 rounded-lg h-96 flex justify-center items-center mb-8 relative"
+        :class="[
+          'bg-white border border-gray-300 rounded-lg flex justify-center items-center mb-8 relative',
+          imageContainerClass
+        ]"
       >
         <template v-if="selectedImage">
           <img
@@ -56,30 +60,6 @@
             <p class="text-sm text-gray-500">Maximum File Size: 1 MB</p>
           </div>
         </template>
-      </div>
-
-      <div v-if="uploadedImages.length > 0">
-        <h3 class="text-xl font-semibold mb-4">Uploaded Designs ({{ uploadedImages.length }})</h3>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <div
-            v-for="(image, index) in uploadedImages"
-            :key="index"
-            class="relative rounded-lg overflow-hidden cursor-pointer h-40"
-            :class="{ 'ring-2 ring-blue-500': image === selectedImage }"
-            @click="selectImage(image)"
-          >
-            <img
-              :src="image"
-              :alt="'Uploaded Design ' + (index + 1)"
-              class="w-full h-full object-cover"
-            />
-            <div
-              class="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded"
-            >
-              {{ getImageScore(image) }}
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -217,6 +197,12 @@ const stats = [
   { name: 'Number of servers', value: '3' },
   { name: 'Success rate', value: '98.5%' }
 ]
+
+const imageContainerClass = computed(() => {
+  return selectedImage.value
+    ? 'h-[90vh]' // 100% height when image is selected
+    : 'h-[30vh]' // 30% of viewport height when no image is selected
+})
 
 const highlightStyle = computed(() => {
   if (!highlightedIssue.value) return {}
@@ -435,16 +421,12 @@ const analyzeImage = async (imageData) => {
 }
 
 const onSelect = (event) => {
-  const files = event.target.files
-  for (let file of files) {
+  const file = event.target.files[0]
+  if (file) {
     const reader = new FileReader()
     reader.onload = async (e) => {
-      const imageData = e.target.result
-      uploadedImages.value.push(imageData)
-      if (!selectedImage.value) {
-        selectedImage.value = imageData
-      }
-      await analyzeImage(imageData)
+      selectedImage.value = e.target.result
+      await analyzeImage(e.target.result)
     }
     reader.readAsDataURL(file)
   }
