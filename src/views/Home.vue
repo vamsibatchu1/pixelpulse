@@ -23,7 +23,7 @@
   <div class="flex flex-1 overflow-hidden">
     <!-- Left Section (dynamically adjusted width and height) -->
     <div
-      :class="['p-8 overflow-y-auto relative', showRightSection ? 'w-full lg:w-8/12' : 'w-full']"
+      :class="['p-8 overflow-hidden relative', showRightSection ? 'w-full lg:w-8/12' : 'w-full']"
     >
       <div class="flex justify-between items-center mb-4">
         <h1 class="text-3xl font-bold">Pixel Pulse</h1>
@@ -69,7 +69,15 @@
       class="w-full lg:w-4/12 bg-neutral-100 p-6 overflow-y-auto shadow-lg"
       style="border-left: 1px solid; border-color: #dedede"
     >
-      <h2 class="text-2xl font-bold mb-4">Design Diagnostics</h2>
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold">Design Diagnostics</h2>
+        <button
+          @click="downloadReport"
+          class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-600"
+        >
+          Download Report
+        </button>
+      </div>
       <div v-if="analysisLoading" class="text-center py-8">
         <img :src="loading" class="w-8 h-8 mx-auto mb-2" />
         <p class="text-gray-600">Analyzing image...</p>
@@ -181,6 +189,7 @@ import spacing from '@/assets/spacing.svg'
 import placeholderImage from '@/assets/thumbnail.svg'
 import loading from '@/assets/loading.gif'
 import axios from 'axios'
+import jsPDF from 'jspdf'
 
 const hasAnalyzedImage = ref(false)
 const analysis = ref(null)
@@ -200,7 +209,7 @@ const stats = [
 
 const imageContainerClass = computed(() => {
   return selectedImage.value
-    ? 'h-[90vh]' // 100% height when image is selected
+    ? 'h-[90vh]' // Set height to 90% of the viewport height
     : 'h-[30vh]' // 30% of viewport height when no image is selected
 })
 
@@ -435,5 +444,63 @@ const onSelect = (event) => {
 const selectImage = (image) => {
   selectedImage.value = image
   analyzeImage(image)
+}
+
+const downloadReport = () => {
+  const doc = new jsPDF()
+
+  // Set padding
+  const padding = 40
+  let startY = padding // Start Y position with padding
+
+  // Add title
+  doc.setFontSize(20)
+  doc.text('Design Diagnostics Report', padding, startY)
+  startY += 20 // Move down for the overall score
+
+  // Add overall score
+  if (analysis.value) {
+    doc.setFontSize(16)
+    doc.text(`Overall Score: ${analysis.value.overallScore.toFixed(1)}`, padding, startY)
+    startY += 20 // Move down for categories
+
+    // Loop through each category
+    analysis.value.categories.forEach((category) => {
+      // Check for page break
+      if (startY + 30 > doc.internal.pageSize.getHeight() - padding) {
+        doc.addPage() // Add a new page
+        startY = padding // Reset startY for the new page
+      }
+
+      // Add category title
+      doc.setFontSize(14)
+      doc.text(`Category: ${category.name}`, padding, startY)
+      startY += 10 // Move down for the score
+
+      // Add category score
+      doc.setFontSize(12)
+      doc.text(`Score: ${category.score.toFixed(1)}`, padding, startY)
+      startY += 10 // Move down for the issues
+
+      // Add issues
+      if (category.issues.length > 0) {
+        category.issues.forEach((issue) => {
+          doc.text(`- ${issue.title}: ${issue.description}`, padding, startY)
+          startY += 8 // Move down for the next issue
+        })
+      } else {
+        doc.text('No issues found.', padding, startY)
+        startY += 8 // Move down for the next category
+      }
+
+      // Add horizontal line between categories
+      startY += 10 // Add space before the line
+      doc.line(padding, startY, doc.internal.pageSize.getWidth() - padding, startY) // Draw a line
+      startY += 5 // Move down after the line
+    })
+  }
+
+  // Save the PDF
+  doc.save('design_diagnostics_report.pdf')
 }
 </script>
